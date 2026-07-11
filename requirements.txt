@@ -1,0 +1,5 @@
+kivy
+requests
+pyyaml
+openai
+plyer

@@ -1,0 +1,14 @@
+# 含敏感信息，禁止提交
+config.json
+cookies/
+
+# 运行时数据
+output/
+logs/
+data/
+transcripts/
+downloads/
+
+# Python
+__pycache__/
+*.pyc

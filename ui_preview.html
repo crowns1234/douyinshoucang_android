@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>拾光 · Android 预览</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0 }
+body { font-family:'Microsoft YaHei','PingFang SC',Roboto,sans-serif; background:#222; display:flex; justify-content:center; align-items:center; min-height:100vh }
+.phone { width:390px; height:780px; background:#f5f5f6; border-radius:32px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.5); display:flex; flex-direction:column }
+.bar { height:40px; background:#1e78c8; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:bold }
+.content { flex:1; overflow-y:auto; padding:14px; scrollbar-width:none }
+.content::-webkit-scrollbar { display:none }
+h2 { color:#333; font-size:18px; margin-bottom:10px }
+.sec { color:#1e78c8; font-weight:bold; font-size:14px; margin:12px 0 6px; padding-bottom:4px; border-bottom:1px solid #e8e8e8 }
+.field { margin-bottom:8px }
+.field label { display:block; color:#888; font-size:11px; margin-bottom:2px }
+.field input { width:100%; padding:10px; font-size:14px; border:none; border-radius:8px; background:#fff; color:#333; outline:none }
+.field input:focus { box-shadow:0 0 0 2px #1e78c8 }
+.toggle-row { display:flex; gap:6px; margin-bottom:8px }
+.toggle { flex:1; padding:10px; text-align:center; border-radius:8px; font-size:13px; cursor:pointer; border:none; background:#e0e0e0; color:#666; transition:all .15s }
+.toggle.on { background:#1e78c8; color:#fff }
+.badge { display:inline-block; padding:3px 10px; border-radius:10px; font-size:11px; margin:4px 0 }
+.badge-ok { background:#d4edda; color:#155724 }
+.badge-no { background:#f8d7da; color:#721c24 }
+.btn { width:100%; padding:13px; font-size:15px; font-weight:bold; border:none; border-radius:10px; cursor:pointer; color:#fff; background:#1e78c8; margin-top:6px; transition:background .15s }
+.btn:active { background:#1668b0 }
+.btn-sm { flex:1; padding:10px; font-size:13px; border:none; border-radius:8px; color:#fff; cursor:pointer }
+.btn-blue { background:#1e78c8 }
+.btn-dark { background:#13528a }
+.btn-row { display:flex; gap:6px; margin-bottom:4px }
+.sched-row { display:flex; align-items:center; gap:6px }
+.sched-row input { width:44px; text-align:center; padding:8px 4px; font-size:16px; border:none; border-radius:6px; background:#fff }
+.prog-label { font-size:12px; color:#888; margin-bottom:2px }
+.prog-bar { height:10px; background:#e0e0e0; border-radius:5px; overflow:hidden; margin-bottom:8px }
+.prog-fill { height:100%; width:0; background:#1e78c8; border-radius:5px; transition:width .4s }
+.log-box { background:#fff; border-radius:8px; padding:10px; font-size:12px; color:#555; height:200px; overflow-y:auto; line-height:1.6 }
+.card { background:#fff; border-radius:10px; padding:12px; font-size:12px; color:#555; line-height:1.7 }
+.card h3 { color:#1e78c8; font-size:14px; margin-bottom:4px }
+.card .item { padding:5px 0; border-bottom:1px solid #eee }
+.card .item:last-child { border:none }
+.nav { height:56px; background:#fff; display:flex; border-top:1px solid #eee }
+.nav button { flex:1; font-size:14px; color:#888; cursor:pointer; border:none; background:none; transition:color .15s }
+.nav button.on { color:#1e78c8; font-weight:bold }
+.nav button:active { background:#f0f0f0 }
+.sel { width:100%; padding:12px; font-size:14px; border:none; border-radius:8px; background:#fff; color:#1e78c8; font-weight:bold; margin-bottom:8px; outline:none }
+.screen { display:none }
+.screen.active { display:block }
+.hidden { display:none }
+</style></head>
+<body>
+<div class="phone">
+<div class="bar">拾 光</div>
+<div class="content" id="area"></div>
+<div class="nav">
+  <button class="on" onclick="show('config')">配置</button>
+  <button onclick="show('run')">运行</button>
+  <button onclick="show('result')">结果</button>
+</div></div>
+<script>
+let method = 'email';
+
+function show(name) {
+  document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('on', i===['config','run','result'].indexOf(name)));
+  const area = document.getElementById('area');
+  if(name==='config') area.innerHTML = renderConfig();
+  if(name==='run') area.innerHTML = renderRun();
+  if(name==='result') area.innerHTML = renderResult();
+  if(name==='config') onMethod();
+}
+
+function onMethod(){
+  document.getElementById('email_fields').classList.toggle('hidden', method!=='email');
+  document.getElementById('wecom_fields').classList.toggle('hidden', method==='email');
+}
+
+function setMethod(m){
+  method=m;
+  document.getElementById('btn_email').classList.toggle('on', m==='email');
+  document.getElementById('btn_wecom').classList.toggle('on', m!=='email');
+  onMethod();
+}
+
+function f(label, placeholder, type){
+  const tp = type==='pw' ? 'password' : 'text';
+  return '<div class="field"><label>'+label+'</label><input type="'+tp+'" placeholder="'+placeholder+'"></div>';
+}
+
+function renderConfig(){
+  return ''+
+'<h2>⚙ 配置</h2>'+
+'<div class="sec">转写 / 摘要密钥</div>'+
+f('百度 API Key','⋯⋯⋯⋯','pw')+
+f('百度 Secret Key','⋯⋯⋯⋯','pw')+
+f('智谱 API Key','⋯⋯⋯⋯','pw')+
+'<div class="sec">推送方式</div>'+
+'<div class="toggle-row">'+
+'<button class="toggle on" id="btn_email" onclick="setMethod(\'email\')">邮件</button>'+
+'<button class="toggle" id="btn_wecom" onclick="setMethod(\'wecom\')">企业微信</button>'+
+'</div>'+
+'<div id="email_fields">'+
+f('发件邮箱','xxxxx@qq.com')+
+f('邮箱授权码','⋯⋯⋯⋯','pw')+
+f('收件邮箱','xxxxx@qq.com')+
+'</div>'+
+'<div id="wecom_fields" class="hidden">'+
+f('Webhook','https://qyapi.weixin.qq.com/...')+
+'</div>'+
+'<div class="sec">Cookie 管理</div>'+
+'<span class="badge badge-ok">Cookie: 已就绪</span>'+
+'<div class="btn-row">'+
+'<button class="btn-sm btn-blue" onclick="alert(\'选择JSON文件\')">导入文件</button>'+
+'<button class="btn-sm btn-dark" onclick="alert(\'粘贴JSON\')">粘贴 JSON</button>'+
+'</div>'+
+'<div class="sec">每天自动运行</div>'+
+'<div class="sched-row">'+
+'时间 <input value="23"> : <input value="00">'+
+'<span style="font-size:11px;color:#888">（平台任务/提醒）</span>'+
+'</div>'+
+'<button class="btn" style="margin-top:12px" onclick="alert(\'配置已保存\')">保 存 配 置</button>'+
+'';
+}
+
+function renderRun(){
+  return ''+
+'<h2>🚀 生成摘要</h2>'+
+'<div class="prog-label">就绪</div>'+
+'<div class="prog-bar"><div class="prog-fill" id="prog"></div></div>'+
+'<button class="btn" onclick="startSim()">一键生成摘要</button>'+
+'<div class="field"><label>运行日志</label></div>'+
+'<div class="log-box" id="log">等待开始...</div>'+
+'';
+}
+
+function startSim(){
+  const log=document.getElementById('log'), prog=document.getElementById('prog');
+  const steps=[{p:10,m:'开始采集抖音收藏...'},{p:25,m:'HTTP 采集到 3 条新收藏'},{p:40,m:'正在转写视频语音...'},{p:60,m:'智谱 AI 生成摘要中...'},{p:85,m:'生成日报...'},{p:100,m:'完成！3 条 | 推送: ✅ 已发送'}];
+  let i=0; log.innerText='';
+  function nxt(){if(i>=steps.length)return;const s=steps[i];prog.style.width=s.p+'%';log.innerText+=s.m+'\n';i++;setTimeout(nxt,600)}
+  nxt();
+}
+
+function renderResult(){
+  return ''+
+'<h2>📋 日报历史</h2>'+
+'<select class="sel" id="dateSel" onchange="loadPreview(this.value)">'+
+'<option>2026-07-12</option><option>2026-07-11</option><option>2026-07-10</option>'+
+'</select>'+
+'<div class="card" id="preview"><h3>拾光 · 每日摘要 · 2026-07-12</h3>'+
+'<div class="item"><b style="color:#1e78c8">科技科普</b>（1）<br><span style="color:#888;font-size:11px">深度解读量子计算突破<br>1. 量子纠错码实现99.9%保真度<br>2. 表面码和颜色码的工程实现<br>3. 预测2027年实用级量子计算机问世</span></div>'+
+'<div class="item"><b style="color:#1e78c8">美食探店</b>（1）<br><span style="color:#888;font-size:11px">成都街头10家隐秘小店<br>1. 玉林菜市场冒烤鸭<br>2. 人均30-50元附详细地址<br>3. 最佳时段工作日下午2-4点</span></div>'+
+'<div class="item"><b style="color:#1e78c8">生活技巧</b>（1）<br><span style="color:#888;font-size:11px">出租屋收纳终极方案<br>1. 磁吸挂钩+伸缩杆打底<br>2. 门后叠挂式收纳袋<br>3. 床底抽屉盒选购:15cm高为宜</span></div>'+
+'</div>'+
+'';
+}
+function loadPreview(date){
+  document.getElementById('preview').innerHTML = '<h3>拾光 · 每日摘要 · '+date+'</h3><div class="item"><span style="color:#888">加载中...</span></div>';
+  setTimeout(function(){
+    document.getElementById('preview').innerHTML = '<h3>拾光 · 每日摘要 · '+date+'</h3>'+
+    '<div class="item"><b style="color:#1e78c8">科技科普</b>（1）<br><span style="color:#888;font-size:11px">'+
+    '（来自 '+date+' 的缓存内容...）</span></div>'+
+    '<div class="item"><b style="color:#1e78c8">美食探店</b>（1）<br><span style="color:#888;font-size:11px">某特色餐厅测评</span></div>';
+  }, 300);
+}
+
+show('config');
+onMethod();
+</script></body></html>

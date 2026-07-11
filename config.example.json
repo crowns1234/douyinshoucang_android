@@ -1,0 +1,13 @@
+{
+  "baidu_api_key": "请填写百度 API Key",
+  "baidu_secret_key": "请填写百度 Secret Key",
+  "zhipu_api_key": "请填写智谱 API Key",
+  "sender": "你的发件邮箱@qq.com",
+  "password": "QQ邮箱授权码",
+  "receiver": "收件邮箱@qq.com",
+  "method": "email",
+  "webhook": "",
+  "sched_hour": 23,
+  "sched_min": 0,
+  "headless": true
+}
