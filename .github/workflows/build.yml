@@ -40,8 +40,8 @@ jobs:
 
       - name: Build APK
         run: |
-          echo "JAVA_HOME=$JAVA_HOME"
-          export PATH="$JAVA_HOME/bin:$PATH"
+          sudo ln -sf $JAVA_HOME/bin/javac /usr/bin/javac
+          sudo ln -sf $JAVA_HOME/bin/java /usr/bin/java
           javac -version
           yes | buildozer android debug
 
