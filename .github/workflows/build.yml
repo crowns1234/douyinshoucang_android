@@ -31,12 +31,15 @@ jobs:
           sudo apt-get install -y openjdk-17-jdk ca-certificates-java autoconf automake libtool unzip zip
           sudo update-ca-certificates -f 2>/dev/null || true
           pip install --upgrade buildozer cython virtualenv
-          java -version
+          # Free up disk space
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
+          df -h /
 
       - name: Build APK
         run: |
           export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          yes | buildozer android debug
+          yes | buildozer android debug 2>&1 | tail -200
+          df -h /
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
