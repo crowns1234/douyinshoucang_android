@@ -39,6 +39,13 @@ def _find_ffmpeg(cfg: dict) -> str:
     cand = os.path.join(BASE_DIR, "tools", "ffmpeg.exe")
     if os.path.exists(cand):
         return cand
+    # Android 内置 ffmpeg（由 Actions 编译时下载打包）
+    for android_cand in (
+        os.path.join(BASE_DIR, "ffmpeg_bin"),
+        os.path.join(os.path.dirname(BASE_DIR), "ffmpeg_bin"),
+    ):
+        if os.path.isfile(android_cand) and os.access(android_cand, os.X_OK):
+            return android_cand
     return "ffmpeg"  # 退回 PATH
 
 

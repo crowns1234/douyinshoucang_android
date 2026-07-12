@@ -10,6 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download FFmpeg for Android
+        run: |
+          curl -sL -o ffmpeg-arm64.zip "https://github.com/Tyrrrz/FFmpegBin/releases/download/8.1.2/ffmpeg-android-arm64.zip"
+          unzip -o ffmpeg-arm64.zip -d /tmp/ffmpeg
+          cp /tmp/ffmpeg/ffmpeg-*/ffmpeg ./ffmpeg_bin
+          chmod +x ./ffmpeg_bin
+          ls -lh ./ffmpeg_bin
+
       - name: Build APK
         uses: ArtemSBulgakov/buildozer-action@v1
         with:
