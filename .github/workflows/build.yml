@@ -38,9 +38,9 @@ jobs:
       - name: Build APK
         run: |
           export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          yes | buildozer android debug
-          echo "=== Build output ==="
-          ls -la bin/
+          yes | buildozer android debug 2>&1 | tail -500
+          echo "=== APK files ==="
+          find bin/ -name '*.apk' -ls 2>/dev/null || echo "No APK found in bin/"
           df -h /
 
       - name: Upload APK
