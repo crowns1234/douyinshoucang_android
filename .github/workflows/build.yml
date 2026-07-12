@@ -38,15 +38,22 @@ jobs:
       - name: Build APK
         run: |
           export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          yes | buildozer android debug 2>&1 | tail -500
-          echo "=== APK files ==="
-          find bin/ -name '*.apk' -ls 2>/dev/null || echo "No APK found in bin/"
+          yes | buildozer android debug 2>&1 | tail -300
+          echo "=== Looking for APK ==="
+          APK=$(find . -name '*.apk' -type f | head -1)
+          if [ -n "$APK" ]; then
+            echo "FOUND: $APK"
+            ls -la "$APK"
+            mkdir -p /tmp/apk-out && cp "$APK" /tmp/apk-out/
+          else
+            echo "NOT FOUND - listing all files in bin/"
+            ls -laR bin/ 2>/dev/null || echo "bin/ does not exist"
+            find . -type f -name "*apk*" -o -name "*shiguang*" -o -name "*.ap_" 2>/dev/null
+          fi
           df -h /
 
-      - name: Find and upload APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ShiGuang-APK
-          path: |
-            bin/*.apk
-            *.apk
+          path: /tmp/apk-out/*.apk
