@@ -40,6 +40,9 @@ jobs:
 
       - name: Build APK
         run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          export PATH="$JAVA_HOME/bin:$PATH"
+          javac -version
           yes | buildozer android debug
 
       - name: Upload APK
