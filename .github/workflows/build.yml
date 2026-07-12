@@ -38,22 +38,15 @@ jobs:
       - name: Build APK
         run: |
           export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          yes | buildozer android debug 2>&1 | tail -300
-          echo "=== Looking for APK ==="
-          APK=$(find . -name '*.apk' -type f | head -1)
-          if [ -n "$APK" ]; then
-            echo "FOUND: $APK"
-            ls -la "$APK"
-            mkdir -p /tmp/apk-out && cp "$APK" /tmp/apk-out/
-          else
-            echo "NOT FOUND - listing all files in bin/"
-            ls -laR bin/ 2>/dev/null || echo "bin/ does not exist"
-            find . -type f -name "*apk*" -o -name "*shiguang*" -o -name "*.ap_" 2>/dev/null
-          fi
-          df -h /
+          yes | buildozer android debug > /tmp/build.log 2>&1; RC=$?
+          echo "=== LAST 100 LINES ==="; tail -100 /tmp/build.log
+          echo "=== ERRORS ==="; grep -i 'error\|fail\|traceback\|cannot' /tmp/build.log | tail -30
+          echo "=== LOOKING FOR APK ==="; find . -name '*.apk' -type f 2>/dev/null
+          echo "=== LISTING BIN ==="; ls -laR bin/ 2>/dev/null || echo "no bin/"
+          exit $RC
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ShiGuang-APK
-          path: /tmp/apk-out/*.apk
+          path: bin/*.apk
