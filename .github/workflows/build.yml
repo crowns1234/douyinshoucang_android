@@ -18,10 +18,17 @@ jobs:
           chmod +x ./ffmpeg_bin
           ls -lh ./ffmpeg_bin
 
+      - name: Install JDK & buildozer
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-17-jdk autoconf automake libtool unzip zip
+          pip install buildozer cython
+
       - name: Build APK
-        uses: ArtemSBulgakov/buildozer-action@v1
-        with:
-          buildozer_spec: buildozer.spec
+        run: |
+          export ANDROID_HOME=~/.buildozer/android/platform/android-sdk
+          export ANDROID_NDK_HOME=~/.buildozer/android/platform/android-ndk-r25b
+          buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
