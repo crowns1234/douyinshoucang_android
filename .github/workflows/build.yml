@@ -10,11 +10,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Cache buildozer
         uses: actions/cache@v4
         with:
           path: ~/.buildozer
-          key: buildozer-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-${{ runner.os }}-v2
 
       - name: Download FFmpeg for Android
         run: |
@@ -23,32 +28,19 @@ jobs:
           unzip -o ffmpeg-arm64.zip -d /tmp/ffmpeg
           cp /tmp/ffmpeg/ffmpeg-*/ffmpeg ./ffmpeg_bin 2>/dev/null || cp /tmp/ffmpeg/ffmpeg ./ffmpeg_bin 2>/dev/null
           chmod +x ./ffmpeg_bin 2>/dev/null
-          ls -lh ./ffmpeg_bin 2>/dev/null || echo "FFmpeg download failed, will build without transcription"
+          ls -lh ./ffmpeg_bin 2>/dev/null || echo "FFmpeg unavailable"
 
-      - name: Install JDK & buildozer
+      - name: Install build tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk autoconf automake libtool unzip zip
-          sudo apt-get install -y ca-certificates-java 2>/dev/null || true
-          sudo mkdir -p /etc/ssl/certs/java
-          if [ ! -f /etc/ssl/certs/java/cacerts ]; then
-            sudo keytool -importkeystore -srckeystore /etc/ssl/certs/java/cacerts -destkeystore /etc/ssl/certs/java/cacerts -srcstorepass changeit -deststorepass changeit 2>/dev/null || \
-            sudo cp /etc/ssl/certs/ca-certificates.crt /tmp/ca-bundle.crt 2>/dev/null; sudo keytool -import -trustcacerts -file /tmp/ca-bundle.crt -keystore /etc/ssl/certs/java/cacerts -storepass changeit -noprompt 2>/dev/null || \
-            sudo touch /etc/ssl/certs/java/cacerts
-          fi
-          pip install --upgrade buildozer cython virtualenv
+          sudo apt-get install -y autoconf automake libtool unzip zip
+          pip install buildozer cython virtualenv
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
           df -h /
 
       - name: Build APK
         run: |
-          export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-          yes | buildozer android debug > /tmp/build.log 2>&1; RC=$?
-          echo "=== LAST 100 LINES ==="; tail -100 /tmp/build.log
-          echo "=== ERRORS ==="; grep -i 'error\|fail\|traceback\|cannot' /tmp/build.log | tail -30
-          echo "=== LOOKING FOR APK ==="; find . -name '*.apk' -type f 2>/dev/null
-          echo "=== LISTING BIN ==="; ls -laR bin/ 2>/dev/null || echo "no bin/"
-          exit $RC
+          yes | buildozer android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
