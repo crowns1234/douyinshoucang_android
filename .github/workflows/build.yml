@@ -12,11 +12,12 @@ jobs:
 
       - name: Download FFmpeg for Android
         run: |
-          curl -sL -o ffmpeg-arm64.zip "https://github.com/Tyrrrz/FFmpegBin/releases/download/8.1.2/ffmpeg-android-arm64.zip"
+          wget -q -O ffmpeg-arm64.zip "https://github.com/Tyrrrz/FFmpegBin/releases/download/8.1.2/ffmpeg-android-arm64.zip" || \
+          curl -sSL -o ffmpeg-arm64.zip "https://github.com/Tyrrrz/FFmpegBin/releases/download/8.1.2/ffmpeg-android-arm64.zip"
           unzip -o ffmpeg-arm64.zip -d /tmp/ffmpeg
-          cp /tmp/ffmpeg/ffmpeg-*/ffmpeg ./ffmpeg_bin
-          chmod +x ./ffmpeg_bin
-          ls -lh ./ffmpeg_bin
+          cp /tmp/ffmpeg/ffmpeg-*/ffmpeg ./ffmpeg_bin 2>/dev/null || cp /tmp/ffmpeg/ffmpeg ./ffmpeg_bin 2>/dev/null
+          chmod +x ./ffmpeg_bin 2>/dev/null
+          ls -lh ./ffmpeg_bin 2>/dev/null || echo "FFmpeg download failed, will build without transcription"
 
       - name: Install JDK & buildozer
         run: |
