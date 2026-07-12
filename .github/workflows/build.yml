@@ -43,6 +43,15 @@ jobs:
           sudo ln -sf $JAVA_HOME/bin/javac /usr/bin/javac
           sudo ln -sf $JAVA_HOME/bin/java /usr/bin/java
           javac -version
+          # Pre-download SDK so buildozer can find SDK manager  
+          yes | buildozer android debug || true
+          # Manually install build-tools that sdkmanager missed
+          SDK=~/.buildozer/android/platform/android-sdk
+          if [ -d "$SDK/cmdline-tools" ]; then
+            CMD=$(find $SDK/cmdline-tools -name sdkmanager -type f | head -1)
+            [ -n "$CMD" ] && yes | $CMD "build-tools;34.0.0" "platforms;android-34" "platform-tools"
+          fi
+          # Rebuild (cached, fast)
           yes | buildozer android debug
 
       - name: Upload APK
