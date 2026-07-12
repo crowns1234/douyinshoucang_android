@@ -47,4 +47,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ShiGuang-APK
-          path: bin/*.apk
+          path: bin/**/*.apk
