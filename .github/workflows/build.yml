@@ -28,10 +28,15 @@ jobs:
       - name: Install JDK & buildozer
         run: |
           sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk ca-certificates-java autoconf automake libtool unzip zip
-          sudo update-ca-certificates -f 2>/dev/null || true
+          sudo apt-get install -y openjdk-17-jdk autoconf automake libtool unzip zip
+          sudo apt-get install -y ca-certificates-java 2>/dev/null || true
+          sudo mkdir -p /etc/ssl/certs/java
+          if [ ! -f /etc/ssl/certs/java/cacerts ]; then
+            sudo keytool -importkeystore -srckeystore /etc/ssl/certs/java/cacerts -destkeystore /etc/ssl/certs/java/cacerts -srcstorepass changeit -deststorepass changeit 2>/dev/null || \
+            sudo cp /etc/ssl/certs/ca-certificates.crt /tmp/ca-bundle.crt 2>/dev/null; sudo keytool -import -trustcacerts -file /tmp/ca-bundle.crt -keystore /etc/ssl/certs/java/cacerts -storepass changeit -noprompt 2>/dev/null || \
+            sudo touch /etc/ssl/certs/java/cacerts
+          fi
           pip install --upgrade buildozer cython virtualenv
-          # Free up disk space
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache
           df -h /
 
